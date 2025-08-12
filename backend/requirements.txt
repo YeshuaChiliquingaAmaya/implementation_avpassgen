@@ -1,0 +1,4 @@
+# contenido de requirements.txt
+fastapi
+uvicorn
+avpassgen==0.1.1

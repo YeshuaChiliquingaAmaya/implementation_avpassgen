@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>avpassgen Web</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos para las transiciones y los sliders */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.5s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+
+        input[type='range']::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #2563eb;
+            cursor: pointer;
+            border-radius: 50%;
+            margin-top: -5px;
+        }
+
+        input[type='range']::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #2563eb;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        /* Evita que se vea el código de Vue antes de que se cargue */
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50">
+
+    <div id="app" v-cloak class="font-sans">
+        <header
+            class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 bg-white px-10 py-3">
+            <div class="flex items-center gap-4 text-slate-800">
+                <div class="size-6 text-blue-600">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z"
+                            fill="currentColor"></path>
+                    </svg>
+                </div>
+                <h2 class="text-slate-800 text-lg font-bold">avpassgen Web</h2>
+            </div>
+        </header>
+
+        <main class="flex flex-1 justify-center p-4 sm:p-5">
+            <div
+                class="flex flex-col w-full max-w-xl rounded-2xl bg-white p-2 sm:p-6 shadow-xl ring-1 ring-slate-900/5">
+                <h1 class="text-slate-900 text-2xl font-bold text-center pb-3 pt-5">Generador de Contraseñas</h1>
+
+                <div class="space-y-4 p-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-slate-800 font-medium">Longitud</label>
+                            <span class="text-slate-800 text-sm font-semibold rounded-md bg-slate-100 px-2 py-1">{{
+                                length }}</span>
+                        </div>
+                        <input type="range" min="8" max="128" v-model.number="length"
+                            class="w-full h-2 bg-slate-200 rounded-lg">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-slate-800 font-medium">Cantidad</label>
+                            <span class="text-slate-800 text-sm font-semibold rounded-md bg-slate-100 px-2 py-1">{{
+                                count }}</span>
+                        </div>
+                        <input type="range" min="1" max="50" v-model.number="count"
+                            class="w-full h-2 bg-slate-200 rounded-lg">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-slate-800 font-medium">Duración de Captura (s)</label>
+                            <span class="text-slate-800 text-sm font-semibold rounded-md bg-slate-100 px-2 py-1">{{
+                                duration.toFixed(1) }}</span>
+                        </div>
+                        <input type="range" min="0.5" max="10" step="0.1" v-model.number="duration"
+                            class="w-full h-2 bg-slate-200 rounded-lg">
+                    </div>
+                </div>
+
+                <div class="px-4 space-y-3 py-3">
+                    <select v-model="charset"
+                        class="form-select w-full rounded-lg text-slate-800 focus:ring-2 focus:ring-blue-600 border-slate-300 h-12 p-3">
+                        <option value="base64url">Alfanumérico (URL-safe, a-z, A-Z, 0-9)</option>
+                        <option value="alnum">Alfanumérico (a-z, A-Z, 0-9)</option>
+                        <option value="alnum+sym">Alfanumérico + Símbolos</option>
+                    </select>
+                    <label class="flex items-center justify-between cursor-pointer py-2">
+                        <span class="text-slate-800 font-medium">Usar Cámara</span>
+                        <input type="checkbox" v-model="use_video" class="sr-only peer">
+                        <div
+                            class="relative w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all">
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer py-2">
+                        <span class="text-slate-800 font-medium">Usar Micrófono</span>
+                        <input type="checkbox" v-model="use_audio" class="sr-only peer">
+                        <div
+                            class="relative w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all">
+                        </div>
+                    </label>
+                </div>
+
+                <div class="flex flex-col px-4 py-3">
+                    <button @click="generate" :disabled="isLoading"
+                        class="flex w-full cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-blue-600 text-white text-base font-bold hover:bg-blue-700 disabled:bg-slate-400 transition-all">
+                        <span>✨ Generar Contraseñas</span>
+                    </button>
+                    <Transition name="fade">
+                        <div v-if="isLoading" class="w-full bg-slate-200 rounded-full h-2.5 mt-4">
+                            <div class="bg-blue-600 h-2.5 rounded-full" :style="{ width: captureProgress + '%' }"></div>
+                        </div>
+                    </Transition>
+                </div>
+
+                <Transition name="fade">
+                    <div v-if="errorMessage || generatedPasswords.length > 0" class="mt-5 px-4">
+                        <div v-if="errorMessage"
+                            class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                            <p class="font-bold">Error de la API</p>
+                            <p>{{ errorMessage }}</p>
+                        </div>
+                        <div v-else>
+                            <h2 class="text-slate-900 text-xl font-bold pb-3 pt-5">Contraseñas Generadas</h2>
+                            <div v-for="password in generatedPasswords" :key="password"
+                                class="relative flex items-center mb-3 group">
+                                <input type="text" readonly :value="password"
+                                    class="w-full rounded-lg text-slate-800 border-slate-300 bg-slate-50 h-14 pl-4 pr-12 font-mono transition group-hover:bg-slate-100">
+                                <button @click="copyToClipboard(password)"
+                                    class="absolute right-2 p-2 rounded-md hover:bg-slate-200 text-slate-500">
+                                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+                                        <path
+                                            d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <Transition name="fade">
+                                <p v-if="successMessage" class="text-center font-semibold text-blue-600 p-2">{{
+                                    successMessage }}</p>
+                            </Transition>
+                        </div>
+                    </div>
+                </Transition>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    length: 24,
+                    count: 1,
+                    duration: 2.0,
+                    charset: 'base64url',
+                    use_video: true,
+                    use_audio: true,
+                    generatedPasswords: [],
+                    isLoading: false,
+                    errorMessage: '',
+                    successMessage: '',
+                    captureProgress: 0,
+                    progressInterval: null,
+                }
+            },
+            methods: {
+                startProgressBar() {
+                    clearInterval(this.progressInterval);
+                    this.captureProgress = 0;
+                    const startTime = Date.now();
+                    const durationMs = this.duration * 1000;
+
+                    this.progressInterval = setInterval(() => {
+                        const elapsedTime = Date.now() - startTime;
+                        const progress = Math.min(100, (elapsedTime / durationMs) * 100);
+                        this.captureProgress = progress;
+                        if (progress >= 100) {
+                            clearInterval(this.progressInterval);
+                        }
+                    }, 100);
+                },
+                async generate() {
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    this.generatedPasswords = [];
+                    this.startProgressBar();
+
+                    const requestBody = {
+                        length: this.length,
+                        count: this.count,
+                        duration: this.duration,
+                        charset: this.charset,
+                        use_video: this.use_video,
+                        use_audio: this.use_audio,
+                    };
+
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/api/v1/generate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody),
+                        });
+                        const data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.detail || 'Ocurrió un error desconocido.');
+                        }
+                        this.generatedPasswords = data.passwords;
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    } finally {
+                        this.isLoading = false;
+                        clearInterval(this.progressInterval);
+                        this.captureProgress = 0;
+                    }
+                },
+                copyToClipboard(passwordText) {
+                    navigator.clipboard.writeText(passwordText).then(() => {
+                        this.successMessage = '¡Contraseña copiada!';
+                        setTimeout(() => { this.successMessage = '' }, 2500);
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+
+</html>
